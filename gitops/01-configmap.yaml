@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: abax-static-config
+  namespace: traefikee
+data:
+  static.toml: |
+    [entryPoints]
+      [entryPoints.web]
+        address = ":80"
+      [entryPoints.web.http.redirections.entryPoint]
+        to = "websecure"
+        scheme = "https"
+
+      [entryPoints.websecure]
+        address = ":443"
+
+      [entryPoints.web-internal]
+        address = ":8000"
+      [entryPoints.web-internal.http.redirections.entryPoint]
+        to = "websecure-internal"
+        scheme = "https"
+
+      [entryPoints.websecure-internal]
+        address = ":8443"
+
+    [api]
+      dashboard = true
+
+    [providers.kubernetesCRD]
+
+    [metrics]
+      [metrics.prometheus]
+
+    [certificatesResolvers.default.acme]
+      email = "tee-prod@containo.us"
+      [certificatesResolvers.default.acme.tlschallenge]
+
+    [certificatesResolvers.mypki.vault]
+      url = "http://vault.default.svc.cluster.local:8200"
+      token = "root"
+      role = "enterprise-demo"
+
+    [authSources]
+      [authSources.oidcSource.oidc]
+        issuer = "https://keycloak.abax.containous.tech/auth/realms/traefiklabs"
+        clientID = "demo-app"
+        clientSecret = "aze"
+
+
+    [apiportal]
+      path = "/spec.json"
+
+    # [mesh]
+    #   acl = true
+    #   ignoreNamespaces = ["traefikee", "kube-system", "default", "monitoring"]
+    #   defaultMode = "http"
+    #   [mesh.metrics]
+    #     [mesh.metrics.prometheus]

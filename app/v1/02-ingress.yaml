@@ -1,0 +1,15 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: app-tls
+  namespace: app
+spec:
+  entryPoints:
+    - websecure-internal
+  routes:
+    - kind: Rule
+      match: Host(`app.private.abax.containous.tech`)
+      services:
+        - name: app-v1
+          port: 80

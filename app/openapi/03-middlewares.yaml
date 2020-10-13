@@ -1,0 +1,38 @@
+## Rate limit
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: ratelimit
+  namespace: api
+spec:
+  rateLimit:
+    average: 2
+    burst: 2
+    period: 10m
+    sourceCriterion:
+      requestHeaderName: X-Traefik-Group
+
+
+## Open ID connect
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: oidc-auth
+  namespace: api
+spec:
+  plugin:
+    oidcAuth:
+      source: oidcSource
+      scopes:
+        - openid
+      redirectUrl: "/callback"
+      session:
+        name: "%s-session"
+        path: "/"
+        secret: powpowpowpowpowpowpowpow
+        expiry: 86400
+      forwardHeaders:
+        X-Traefik-Group: groups
+      claims: Contains(`groups`, `admin`)

@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-httpbin
+  namespace: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-httpbin
+  template:
+    metadata:
+      labels:
+        app: api-httpbin
+    spec:
+      containers:
+        - name: whoami
+          image: kennethreitz/httpbin
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-httpbin
+  namespace: api
+  labels:
+    app: api-httpbin
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      name: api
+  selector:
+    app: api-httpbin
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: api-httpbin-tls
+  namespace: api
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`httpbin.abax.containous.tech`)
+      services:
+        - name: api-httpbin
+          port: 80
+      middlewares:
+        - name: oidc-auth
+        - name: ratelimit
+  tls:
+    certResolver: default

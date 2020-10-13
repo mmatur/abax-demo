@@ -1,0 +1,19 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: dashboard-tls
+  namespace: traefikee
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`dashboard.abax.containous.tech`)
+      services:
+        - name: api@internal
+          kind: TraefikService
+      # middlewares:
+      #   - name: oidc-auth
+  tls:
+    certResolver: default
